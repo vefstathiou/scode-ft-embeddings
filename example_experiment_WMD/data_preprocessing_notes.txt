@@ -1,0 +1,24 @@
+
+# For each library separately tokenize, preprocess and store each in a separate document
+../replication_toolkit/tokenize-lang.sh repo-log4j > example-log4j-tok
+../replication_toolkit/tokenize-lang.sh repo-slf4j > example-slf4j-tok
+../replication_toolkit/tokenize-lang.sh repo-spatial4j > example-spatial4j-tok
+
+# ftskip-dim100-ws5-vocab contains the the model's vocabulary. It can be acquired
+# from a .txt format of the model, using some conversion tool such as
+# https://github.com/marekrei/convertvec
+ ../convertvec/convertvec bin2txt java-ftskip-dim100-ws5.bin java-ftskip-dim100-ws5-txt
+ awk '{print $1}' java-ftskip-dim100-ws5-txt.bin > ftskip-dim100-ws5-vocab
+
+# Filter unknown words. Only words that are encoded in the model's vocabulary
+# are used for the WMD estimation. For each tokenized document find words that do not
+# exist in the model's keyed vectors
+ fgrep -Fvxf  java-ftskip-dim100-ws5-vocab example-log4j-tok | sort -u > example-log4j-filter
+ fgrep -Fvxf  java-ftskip-dim100-ws5-vocab example-slf4j-tok | sort -u > example-slf4j-filter
+ fgrep -Fvxf  java-ftskip-dim100-ws5-vocab example-spatial4j-tok | sort -u > example-spatial4j-filter
+
+ # Filter them out. Store the tokenized filtered documents that will be used
+ # for estimating pairwise document distances.
+ cat example-log4j-tok | fgrep -v -x -f example-log4j-filter > example-log4j-doc
+ cat example-slf4j-tok | fgrep -v -x -f example-slf4j-filter > example-slf4j-doc
+ cat example-spatial4j-tok | fgrep -v -x -f example-spatial4j-filter > example-spatial4j-doc
