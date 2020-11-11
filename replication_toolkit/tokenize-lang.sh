@@ -23,7 +23,7 @@ while read repo ; do
 
   echo Repo: $repo 1>&2
   git --git-dir="$gdir" ls-tree -r --name-only $BRANCH |
-  grep ".$EXTENSION\$" |
+  grep "\.$EXTENSION\$" |
   while read file ; do
     echo File: $repo:$file 1>&2
     git --git-dir="$gdir" show $BRANCH:"$file" |
